@@ -17,3 +17,13 @@ To improve this, I introduced a map of indexes with the key being the order id. 
 This will give the price of the order of which we can use to go to the correct queue by the price grouping. 
 
 This further improves the deletion and modification of an order from O(m x n) to O(1).
+
+
+
+# Matching engine
+
+For the matching engine, I chose to go with peek() and poll() methods from the Queue class so that I can maintain the priority of the
+orders that are partially filled while at the end adding any remaining quantities as new orders.
+Using peek lets us process the order before we decide to remove it from the queue or keep it.
+In the worst case scenario, processing a matching order will take O(1) to find the matching group and O(m) to traverse
+the queue, so O(n) will be the complexity of processing a new match.
