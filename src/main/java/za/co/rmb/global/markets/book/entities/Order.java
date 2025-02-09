@@ -1,17 +1,13 @@
-package za.co.rmb.global.markets.order.book.entities;
+package za.co.rmb.global.markets.book.entities;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
 public class Order implements Serializable {
-
     private final String orderId;
-
     private int quantity;
-
     private double price;
-
     private Side side;
 
     public Order(int quantity, double price, Side side) {
@@ -70,9 +66,5 @@ public class Order implements Serializable {
                 ", price=" + price +
                 ", side=" + side +
                 '}';
-    }
-
-    public enum Operation {
-        DELETE, UPDATE
     }
 }

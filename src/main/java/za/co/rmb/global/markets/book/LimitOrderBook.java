@@ -1,9 +1,7 @@
-package za.co.rmb.global.markets.order.book;
-
-import za.co.rmb.global.markets.order.book.entities.Order;
-import za.co.rmb.global.markets.order.book.entities.Side;
+package za.co.rmb.global.markets.book;
 
 import java.util.*;
+import za.co.rmb.global.markets.book.entities.*;
 
 public class LimitOrderBook {
     private final TreeMap<Double, Queue<Order>> bids;
@@ -14,6 +12,19 @@ public class LimitOrderBook {
         bids = new TreeMap<>();
         asks = new TreeMap<>();
         orderIndex = new HashMap<>();
+    }
+
+    public List<Order> retrieveAllOrders() {
+        List<Order> allOrders = new ArrayList<>();
+        // Add all orders from bids
+        for (Queue<Order> queue : bids.values()) {
+            allOrders.addAll(queue);
+        }
+        // Add all orders from asks
+        for (Queue<Order> queue : asks.values()) {
+            allOrders.addAll(queue);
+        }
+        return allOrders;
     }
 
     public List<Order> retrieveBidsByPrice(Double price) {
@@ -36,21 +47,17 @@ public class LimitOrderBook {
 
     public void deleteOrderById(String orderId) {
         Order order = retrieveOrderById(orderId);
-
         if (order == null) {
             throw new IllegalArgumentException("Order with ID " + orderId + " not found.");
         }
-
         removeOrderFromBook(order);
     }
 
     public void updateOrderQuantity(String orderId, int newQuantity) {
         Order order = orderIndex.get(orderId);
-
         if (order == null) {
             throw new IllegalArgumentException("Order with ID " + orderId + " not found.");
         }
-
         removeOrderFromBook(order);
         order.setQuantity(newQuantity);
         addNewOrder(order);
