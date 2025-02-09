@@ -1,4 +1,4 @@
-package za.co.rmb.global.markets.book;
+package za.co.rmb.global.markets.book.limit;
 
 import java.util.*;
 import za.co.rmb.global.markets.book.entities.*;
@@ -12,6 +12,10 @@ public class LimitOrderBook {
         bids = new TreeMap<>();
         asks = new TreeMap<>();
         orderIndex = new HashMap<>();
+    }
+
+    public Order retrieveOrderById(String orderId) {
+        return orderIndex.get(orderId);
     }
 
     public List<Order> retrieveAllOrders() {
@@ -41,8 +45,16 @@ public class LimitOrderBook {
         orderIndex.put(order.getOrderId(), order);
     }
 
-    public Order retrieveOrderById(String orderId) {
-        return orderIndex.get(orderId);
+    public void removeOrderFromBook(Order order) {
+        TreeMap<Double, Queue<Order>> book = order.getSide() == Side.BUY ? bids : asks;
+        Queue<Order> queue = book.get(order.getPrice());
+
+        if (queue != null) {
+            queue.remove(order);
+            if (queue.isEmpty()) {
+                book.remove(order.getPrice()); // Remove empty price level
+            }
+        }
     }
 
     public void deleteOrderById(String orderId) {
@@ -51,6 +63,7 @@ public class LimitOrderBook {
             throw new IllegalArgumentException("Order with ID " + orderId + " not found.");
         }
         removeOrderFromBook(order);
+        this.orderIndex.remove(order.getOrderId());
     }
 
     public void updateOrderQuantity(String orderId, int newQuantity) {
@@ -63,15 +76,11 @@ public class LimitOrderBook {
         addNewOrder(order);
     }
 
-    public void removeOrderFromBook(Order order) {
-        TreeMap<Double, Queue<Order>> book = order.getSide() == Side.BUY ? bids : asks;
-        Queue<Order> queue = book.get(order.getPrice());
+    public TreeMap<Double, Queue<Order>> getAsks() {
+        return asks;
+    }
 
-        if (queue != null) {
-            queue.remove(order);
-            if (queue.isEmpty()) {
-                book.remove(order.getPrice()); // Remove empty price level
-            }
-        }
+    public TreeMap<Double, Queue<Order>> getBids() {
+        return bids;
     }
 }
