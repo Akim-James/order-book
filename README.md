@@ -1,29 +1,35 @@
 # Limit order-book
 
-In this LimitOrderBook implementation. I chose to go with separating bids and asks, and forced the specification of quantity, price and side.
-This will avoid having to traverse through bids when handling an ask, and vice versa. 
+In this LimitOrderBook implementation, I chose to separate bids and asks while enforcing the specification of quantity, price, 
+and side when creating an order. This ensures that we do not need to traverse bids when handling an ask, and vice versa.
+By forcing the side at order creation, we can efficiently store it in the correct book for buy orders and asks for sell orders.
 
-By forcing side during creation of an order, we are easily able to store it into the correct book, i.e, a bid into bids and an ask into asks.
+### Choice of Data Structures
+For storage, I chose a TreeMap with the price as the key. A TreeMap provides an efficient way to maintain a sorted order book by price.
 
-For the choice of data structure, I chose to go with a TreeMap with the key being the price for the storage of the two. A tree map offers the most efficient  way of having a sorted order book according to price. 
-Once an order is grouped with the correct prices, then it makes sense to go with a Queue for the data structure to store the actual orders.
+Once orders are grouped by price, a Queue is the most logical data structure to store the actual orders. Since priority is given to the 
+earliest arrival time, and orders lose priority when modified, a FIFO (First-In, First-Out) queue ensures fair execution.
 
-Since we are giving priority to order with the earliest arrival time and an order has to lose priority during modification, a queue makes sense as the best option to store actual orders, first in, first out (FIFO).
-
-Just separating the two, bids and asks and storing them into tree maps would suffice if we didn't take performance into consideration. 
-A search for an order by id would have us iterate through all the prices and then through each queue to find it, this will be of complexity O(m x n).
-
-To improve this, I introduced a map of indexes with the key being the order id. This improves the lookup for an order by id from O(m x n) to O(1). 
-This will give the price of the order of which we can use to go to the correct queue by the price grouping. 
-
-This further improves the deletion and modification of an order from O(m x n) to O(1).
-
-
+### Optimizing Order Lookups
+If performance were not a concern, simply separating bids and asks into TreeMaps would be sufficient. 
+However, searching for an order by ID would require iterating through all price levels and then through each queue—resulting in a time complexity of O(m × n).
+To optimize this, I introduced an index map, where the order ID is the key. 
+This improves order lookup time from O(m × n) to O(1) by allowing direct access to the price group in the book. 
+This also enhances deletion and modification efficiency from O(m × n) to O(1).
 
 # Matching engine
 
-For the matching engine, I chose to go with peek() and poll() methods from the Queue class so that I can maintain the priority of the
-orders that are partially filled while at the end adding any remaining quantities as new orders.
-Using peek lets us process the order before we decide to remove it from the queue or keep it.
-In the worst case scenario, processing a matching order will take O(1) to find the matching group and O(m) to traverse
-the queue, so O(n) will be the complexity of processing a new match.
+For the matching engine, I used the peek() and poll() methods from the Queue class to maintain order priority when handling partial fills.
+* peek() allows processing an order before deciding whether to remove it.
+* poll() removes fully filled orders.
+* Any remaining quantity is added back to the order book as a new order.
+
+### Performance Considerations
+In the worst-case scenario, processing a matching order involves:
+
+* O(1) to find the matching price level.
+* O(m) to traverse the queue at that price.
+* O(n) for overall processing.
+
+Thus, the complexity of processing a new match is O(n).
+
